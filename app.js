@@ -1,9 +1,33 @@
 'use strict';
 
 import React from 'react';
-import PokeTeam from './index';
+import Pokemon from './index';
 
-React.render(
-  <PokeTeam team={['bulbasaur', 'squirtle', 'charmander']}/>,
-  document.getElementById('root')
-);
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+    return (
+      <div>
+        <input type="text" onKeyUp={this.onKeyUp.bind(this)}/>
+        <Pokemon name={this.state.pokemon}/>
+      </div>
+    );
+  }
+
+  onKeyUp(e) {
+    if (e.keyCode === 13) {
+      this.setState({
+        pokemon: e.target.value
+      });
+    }
+  }
+}
+
+App.PropTypes = {};
+App.defaultProps = {};
+
+export default App;

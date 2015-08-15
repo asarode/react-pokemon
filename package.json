@@ -15,8 +15,10 @@
     "bluebird": "^2.9.34",
     "browser-sync": "^2.8.2",
     "browserify": "^11.0.1",
+    "capitalize": "^1.0.0",
     "classname": "0.0.0",
     "gulp": "^3.9.0",
+    "is-empty": "0.0.1",
     "react": "^0.13.3",
     "source": "0.0.3",
     "vinyl-source-stream": "^1.1.0"

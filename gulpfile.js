@@ -5,7 +5,7 @@ var source = require('vinyl-source-stream');
 var browserSync = require('browser-sync');
 
 gulp.task('browserify', function() {
-  browserify('./app.js')
+  browserify('./main.js')
     .transform(babelify)
     .bundle()
     .pipe(source('bundle.js'))

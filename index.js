@@ -1,44 +1,49 @@
 'use strict';
 
 import React from 'react';
+import cx from 'classname';
 import axios from 'axios';
 import Promise from 'bluebird';
+import capitalize from 'capitalize';
+import empty from 'is-empty';
 
-class PokeTeam extends React.Component {
+class Pokemon extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      team: []
+      pokemon: {},
+      image: ''
     };
   }
 
   componentDidMount() {
-    this.fetchTeamInfo();
+    this.fetchInfo();
   }
 
-  fetchTeamInfo() {
-    let base = 'http://pokeapi.co/api/v1/pokemon/';
-    Promise.map(this.props.team, (name) => {
-      let url = base + name;
-      return this.axiosGet(url);
-    })
-    .then(data => {
-      this.setState({
-        team: data
-      });
-    })
-    .catch(err => {
-      console.log(err);
-    });
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.name !== this.props.name) {
+      this.fetchInfo();
+    }
   }
 
-  axiosGet(url) {
-    return axios.get(url)
+  fetchInfo() {
+    let base = 'http://pokeapi.co'
+    let api = '/api/v1/pokemon/';
+    let name = this.props.name
+      ? this.props.name.toLowerCase()
+      : 'bulbasaur';
+    let url = base + api + name;
+    axios.get(url)
       .then(res => {
-        return res.data;
+        this.setState({
+          pokemon: res.data
+        });
+        return axios.get(base + res.data.sprites[0].resource_uri);
       })
-      .catch(res => {
-        return res;
+      .then(res => {
+        this.setState({
+          image: base + res.data.image
+        });
       });
   }
 
@@ -61,48 +66,99 @@ class PokeTeam extends React.Component {
 
     return (
       <div>
-        <h1>My Pokemon Team</h1>
-        {this.pokemonTeam}
+        {this.pokemon}
       </div>
     );
   }
 
-  get pokemonTeam() {
-    if (this.state.team.length === 0) {
-      return this.props.team.map((name, i) => {
-        return this.preivewPokemon(name, i);
-      });
+  get css() {
+    return {
+      card: {
+        backgroundColor: '#f5f5f5',
+        display: 'inline-block',
+        borderRadius: '3px',
+        border: '1px solid #f0f0f0'
+      },
+      cardHead: {
+        display: 'inline-block',
+        width: 100,
+        backgroundColor: '#fafafa',
+        borderRight: '1px solid #f0f0f0'
+      },
+      cardHeadImg: {
+        width: '100%'
+      },
+      cardBody: {
+        display: 'inline-block',
+        width: 360,
+        verticalAlign: 'top'
+      },
+      typeBadge: {
+        display: 'inline-block',
+        padding: '4px',
+        color: '#fff'
+      },
+      typeGrass: {
+        backgroundColor: '#78C850'
+      },
+      typePoison: {
+        backgroundColor: '#A040A0'
+      }
     }
-    return this.state.team.map((pokemon, i) => {
-      return this.pokemon(pokemon, i);
+  }
+
+  get pokemon() {
+    if (empty(this.state.pokemon)) {
+      name = this.props.name.toLowerCase();
+      return this.previewCard(name);
+    }
+    return this.card();
+  }
+
+  get type() {
+    console.log(this.state.pokemon)
+    return this.state.pokemon.types.map(type => {
+      let _style = {
+        ...this.css.typeBadge,
+        ...this.css['type' + capitalize(type.name)]
+      }
+      return (
+        <span style={_style}>{type.name}</span>
+      );
     });
   }
 
-  pokemon(pokemon, i) {
+  card() {
+    let { pokemon, image } = this.state;
     return (
-      <div key={i}>
-        <div>{pokemon.name}</div>
+      <div style={this.css.card}>
+        <div style={this.css.cardHead}>
+          <img style={this.css.cardHeadImg} src={image}/>
+        </div>
+        <div style={this.css.cardBody}>
+          <h1>{pokemon.name}</h1>
+          {this.type}
+        </div>
       </div>
     );
   }
 
-  preivewPokemon(name, key) {
+  previewCard(name) {
+    name = capitalize(name);
     return (
-      <div key={key}>
+      <div>
         <div>{name}</div>
-        <div>...</div>
-        <div>...</div>
       </div>
     );
   }
 }
 
-PokeTeam.PropTypes = {
-  team: React.PropTypes.array
+Pokemon.PropTypes = {
+  name: React.PropTypes.string
 };
 
-PokeTeam.defaultProps = {
-  team: []
+Pokemon.defaultProps = {
+  name: ''
 };
 
-export default PokeTeam;
+export default Pokemon;
